@@ -52,7 +52,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   # Any other field set here will be passed to Riemann as an event attribute.
   #
   # Example:
-  #
+  # [source,ruby]
   #     riemann {
   #         riemann_event => {
   #             "metric"  => "%{metric}"
@@ -72,6 +72,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   # separated by dots and the deepest value.
   #
   # As an example, the logstash event:
+  # [source,ruby]
   #    {
   #      "@timestamp":"2013-12-10T14:36:26.151+0000",
   #      "@version": 1,
@@ -82,6 +83,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   #                      }
   #    }
   # Is mapped to this riemann event:
+  # [source,ruby]
   #   {
   #     :time 1386686186,
   #     :host host.domain.com,
