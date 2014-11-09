@@ -12,9 +12,9 @@ require "logstash/namespace"
 #
 # You can learn about Riemann here:
 #
-# * <http://riemann.io/>
+# * http://riemann.io/
 # You can see the author talk about it here:
-# * <http://vimeo.com/38377415>
+# * http://vimeo.com/38377415
 #
 class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   config_name "riemann"
@@ -41,7 +41,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   config :sender, :validate => :string, :default => "%{host}"
 
   # A Hash to set Riemann event fields
-  # (<http://riemann.io/concepts.html>).
+  # (http://riemann.io/concepts.html).
   #
   # The following event fields are supported:
   # `description`, `state`, `metric`, `ttl`, `service`
