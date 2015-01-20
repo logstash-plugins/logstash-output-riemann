@@ -18,7 +18,6 @@ require "logstash/namespace"
 #
 class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   config_name "riemann"
-  milestone 1
 
   # The address of the Riemann server.
   config :host, :validate => :string, :default => "localhost"
