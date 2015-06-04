@@ -83,5 +83,14 @@ describe "outputs/riemann" do
         expect(output.build_reimann_formatted_event(event)).to eq expected_data
       end
     end
+    context "with tags" do
+      it "will return a symboled tags with multiple tags" do
+        data = {"tags"=> ["good_enough", "smart_enough", "doggone_it", "people_like_me"], "message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:tags => ["good_enough", "smart_enough", "doggone_it", "people_like_me"], :time=>1433374494, :description =>"hello", :host =>"vagrant-ubuntu-trusty-64"}
+        event = LogStash::Event.new data
+        output = LogStash::Plugin.lookup("output", "riemann").new
+        expect(output.build_reimann_formatted_event(event)).to eq expected_data
+      end
+    end
   end
 end
