@@ -46,4 +46,21 @@ describe "outputs/riemann" do
         }.not_to raise_error
     end
   end
+
+  context "map_fields" do
+    context "with basic data" do
+      it "will return keys that do not start with @ sign." do
+        data = {"message"=>"hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:message=>"hello", :host=>"vagrant-ubuntu-trusty-64"}
+        output = LogStash::Plugin.lookup("output", "riemann").new
+        expect(output.map_fields(nil, data)).to eq expected_data
+      end
+      it "will return a hash of nested values" do
+        data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:message =>"hello", :host =>"vagrant-ubuntu-trusty-64", :"node_info.name" => "node1", :"node_info.status" => "up"}
+        output = LogStash::Plugin.lookup("output", "riemann").new
+        expect(output.map_fields(nil, data)).to eq expected_data
+      end
+    end
+  end
 end
