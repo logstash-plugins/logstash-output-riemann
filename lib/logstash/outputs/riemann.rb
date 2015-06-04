@@ -124,13 +124,13 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   def receive(event)
     return unless output?(event)
 
-    r_event = build_reimann_formatted_event(event)
+    r_event = build_riemann_formatted_event(event)
     
     @logger.debug("Riemann event: ", :riemann_event => r_event)
     send_to_riemann(r_event)
   end # def receive
 
-  def build_reimann_formatted_event(event)
+  def build_riemann_formatted_event(event)
     # Let's build us an event, shall we?
     r_event = Hash.new
     r_event[:host] = event.sprintf(@sender)
