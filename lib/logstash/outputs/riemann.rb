@@ -125,6 +125,13 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   def receive(event)
     return unless output?(event)
 
+    r_event = build_reimann_formatted_event(event)
+    
+    @logger.debug("Riemann event: ", :riemann_event => r_event)
+    send_to_riemann(r_event)
+  end # def receive
+
+  def build_reimann_formatted_event(event)
     # Let's build us an event, shall we?
     r_event = Hash.new
     r_event[:host] = event.sprintf(@sender)
@@ -141,18 +148,21 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
       end
     end
     if @map_fields == true
-      @my_event = Hash.new
-      map_fields(nil, event.to_hash)
-      r_event.merge!(@my_event) {|key, val1, val2| val1}
+      r_event.merge! map_fields(nil, event.to_hash)
     end
     r_event[:tags] = event["tags"] if event["tags"].is_a?(Array)
-    @logger.debug("Riemann event: ", :riemann_event => r_event)
+
+    return r_event
+  end
+
+  def send_to_riemann(riemann_formatted_event)
     begin
       proto_client = @client.instance_variable_get("@#{@protocol}")
       @logger.debug("Riemann client proto: #{proto_client.to_s}")
-      proto_client << r_event
+      proto_client << riemann_formatted_event
     rescue Exception => e
       @logger.debug("Unhandled exception", :error => e)
     end
-  end # def receive
+  end # def send_to_riemann
+
 end # class LogStash::Outputs::Riemann
