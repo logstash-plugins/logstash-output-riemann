@@ -107,17 +107,18 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
 
   public
   def map_fields(parent, fields)
-    fields.each {|key, val|
+    this_level = Hash.new
+    fields.each do |key, contents|
       if !key.start_with?("@")
-        field = parent.nil? ? key : parent + '.' + key
-        contents = val                            
+        field = parent.nil? ? key : parent + '.' + key                          
         if contents.is_a?(Hash)                                     
-          map_fields(field, contents)                                       
+          this_level.merge! map_fields(field, contents)                                       
         else                                                                                  
-          @my_event[field.to_sym] = contents                                                          
+          this_level[field.to_sym] = contents                                                          
         end
       end
-    }                 
+    end
+    return this_level
   end
 
   public
@@ -141,7 +142,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
     end
     if @map_fields == true
       @my_event = Hash.new
-      map_fields(nil, event)
+      map_fields(nil, event.to_hash)
       r_event.merge!(@my_event) {|key, val1, val2| val1}
     end
     r_event[:tags] = event["tags"] if event["tags"].is_a?(Array)
