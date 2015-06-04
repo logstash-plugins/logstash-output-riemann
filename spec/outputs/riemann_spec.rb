@@ -65,12 +65,23 @@ describe "outputs/riemann" do
   end
 
   context "build_reimann_formatted_event" do
-    it "will return symboled hash with at least :host, :time, and :description" do
-      data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
-      expected_data = {:time=>1433374494,:message =>"hello", :description =>"hello", :host =>"vagrant-ubuntu-trusty-64", :"node_info.name" => "node1", :"node_info.status" => "up"}
-      event = LogStash::Event.new data
-      output = LogStash::Plugin.lookup("output", "riemann").new("map_fields" => "true")
-      expect(output.build_reimann_formatted_event(event)).to eq expected_data
+    context "with map_fields" do
+      it "will return symboled hash with at least :host, :time, and :description" do
+        data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:time=>1433374494,:message =>"hello", :description =>"hello", :host =>"vagrant-ubuntu-trusty-64", :"node_info.name" => "node1", :"node_info.status" => "up"}
+        event = LogStash::Event.new data
+        output = LogStash::Plugin.lookup("output", "riemann").new("map_fields" => "true")
+        expect(output.build_reimann_formatted_event(event)).to eq expected_data
+      end
+    end
+    context "without map_fields" do
+      it "will return symboled hash with at least :host, :time, and :description" do
+        data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:time=>1433374494, :description =>"hello", :host =>"vagrant-ubuntu-trusty-64"}
+        event = LogStash::Event.new data
+        output = LogStash::Plugin.lookup("output", "riemann").new
+        expect(output.build_reimann_formatted_event(event)).to eq expected_data
+      end
     end
   end
 end
