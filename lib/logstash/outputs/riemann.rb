@@ -13,6 +13,7 @@ require "logstash/namespace"
 # You can learn about Riemann here:
 #
 # * http://riemann.io/
+#
 # You can see the author talk about it here:
 # * http://vimeo.com/38377415
 #
