@@ -122,7 +122,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
 
   public
   def receive(event)
-    return unless output?(event)
+    
 
     r_event = build_riemann_formatted_event(event)
     
