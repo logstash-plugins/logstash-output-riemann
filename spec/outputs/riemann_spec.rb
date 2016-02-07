@@ -120,5 +120,15 @@ describe "outputs/riemann" do
       end
 
     end
+
+    context "with riemann_event" do
+      it "will return a symboled hash with overriden description field" do
+        data = {"field_a" => "foobar", "message" => "hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:time=>1433374494, :description =>"foobar", :host =>"vagrant-ubuntu-trusty-64"}
+        event = LogStash::Event.new data
+        output.riemann_event = {"description" => "%{field_a}"}
+        expect(output.build_riemann_formatted_event(event)).to eq expected_data
+      end
+    end
   end
 end
