@@ -3,11 +3,11 @@ require "logstash/plugin"
 require "logstash/json"
 
 describe "outputs/riemann" do
-
+  let(:output) { LogStash::Plugin.lookup("output", "riemann").new }
+  
   context "registration" do
 
     it "should register" do
-      output = LogStash::Plugin.lookup("output", "riemann").new
       expect {output.register}.not_to raise_error
     end
 
@@ -38,7 +38,6 @@ describe "outputs/riemann" do
 
   context "receive" do
 
-    output = LogStash::Plugin.lookup("output", "riemann").new
     data = {"message"=>"hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
     event = LogStash::Event.new data
 
@@ -51,6 +50,7 @@ describe "outputs/riemann" do
 
   end
 
+
   context "map_fields" do
 
     context "with basic data" do
@@ -58,14 +58,12 @@ describe "outputs/riemann" do
       it "will return keys that do not start with @ sign." do
         data = {"message"=>"hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
         expected_data = {:message=>"hello", :host=>"vagrant-ubuntu-trusty-64"}
-        output = LogStash::Plugin.lookup("output", "riemann").new
         expect(output.map_fields(nil, data)).to eq expected_data
       end
 
       it "will return a hash of nested values" do
         data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
         expected_data = {:message =>"hello", :host =>"vagrant-ubuntu-trusty-64", :"node_info.name" => "node1", :"node_info.status" => "up"}
-        output = LogStash::Plugin.lookup("output", "riemann").new
         expect(output.map_fields(nil, data)).to eq expected_data
       end
 
@@ -76,14 +74,22 @@ describe "outputs/riemann" do
 
     context "with map_fields" do
 
+      let(:output) { LogStash::Plugin.lookup("output", "riemann").new("map_fields" => "true") }
+
       it "will return symboled hash with at least :host, :time, and :description" do
         data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
         expected_data = {:time=>1433374494, :message =>"hello", :description =>"hello", :host =>"vagrant-ubuntu-trusty-64", :"node_info.name" => "node1", :"node_info.status" => "up"}
         event = LogStash::Event.new data
-        output = LogStash::Plugin.lookup("output", "riemann").new("map_fields" => "true")
         expect(output.build_riemann_formatted_event(event)).to eq expected_data
       end
 
+      it "will return a symboled hash with :host value from specified field" do
+        data = {"test_hostname" => "node1", "message" => "hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:time=>1433374494, :description =>"hello", :host =>"node1", :test_hostname => "node1", :message => "hello"}
+        event = LogStash::Event.new data
+        output.sender = "%{test_hostname}"
+        expect(output.build_riemann_formatted_event(event)).to eq expected_data
+      end
     end
 
     context "without map_fields" do
@@ -92,10 +98,16 @@ describe "outputs/riemann" do
         data = {"message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
         expected_data = {:time=>1433374494, :description =>"hello", :host =>"vagrant-ubuntu-trusty-64"}
         event = LogStash::Event.new data
-        output = LogStash::Plugin.lookup("output", "riemann").new
         expect(output.build_riemann_formatted_event(event)).to eq expected_data
       end
 
+      it "will return a symboled hash with :host value from specified field" do
+        data = {"test_hostname" => "node1", "message" => "hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:time=>1433374494, :description =>"hello", :host =>"node1"}
+        event = LogStash::Event.new data
+        output.sender = "%{test_hostname}"
+        expect(output.build_riemann_formatted_event(event)).to eq expected_data
+      end
     end
 
     context "with tags" do
@@ -104,11 +116,9 @@ describe "outputs/riemann" do
         data = {"tags"=> ["good_enough", "smart_enough", "doggone_it", "people_like_me"], "message"=>"hello", "node_info" => {"name" => "node1", "status" => "up"}, "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
         expected_data = {:tags => ["good_enough", "smart_enough", "doggone_it", "people_like_me"], :time=>1433374494, :description =>"hello", :host =>"vagrant-ubuntu-trusty-64"}
         event = LogStash::Event.new data
-        output = LogStash::Plugin.lookup("output", "riemann").new
         expect(output.build_riemann_formatted_event(event)).to eq expected_data
       end
 
     end
-
   end
 end

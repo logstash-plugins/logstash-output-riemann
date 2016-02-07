@@ -133,10 +133,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   def build_riemann_formatted_event(event)
     # Let's build us an event, shall we?
     r_event = Hash.new
-    r_event[:host] = event.sprintf(@sender)
     # riemann doesn't handle floats so we reduce the precision here
-    r_event[:time] = event["@timestamp"].to_i
-    r_event[:description] = event["message"]
     if @riemann_event
       @riemann_event.each do |key, val|
         if ["ttl","metric"].include?(key)
@@ -150,6 +147,9 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
       r_event.merge! map_fields(nil, event.to_hash)
     end
     r_event[:tags] = event["tags"] if event["tags"].is_a?(Array)
+    r_event[:host] = event.sprintf(@sender)
+    r_event[:time] = event["@timestamp"].to_i
+    r_event[:description] = event["message"]
 
     return r_event
   end
