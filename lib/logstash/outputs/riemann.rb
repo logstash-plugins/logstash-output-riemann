@@ -109,7 +109,7 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
   def map_fields(parent, fields)
     this_level = Hash.new
     fields.each do |key, contents|
-      next if key.start_with?("@")
+      next if key.start_with?("@") or ["host","time","description"].include?(key)
       field = parent.nil? ? key : "#{parent}.#{key}"                         
       if contents.is_a?(Hash)                                     
         this_level.merge! map_fields(field, contents)                                       
