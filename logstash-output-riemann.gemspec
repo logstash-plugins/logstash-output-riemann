@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name            = 'logstash-output-riemann'
-  s.version         = '3.0.2'
+  s.version         = '3.0.3'
   s.licenses        = ['Apache License (2.0)']
-  s.summary         = "Riemann is a network event stream processing system."
+  s.summary         = "Sends metrics to Riemann"
   s.description     = "This gem is a Logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/logstash-plugin install gemname. This gem is not a stand-alone program"
   s.authors         = ["Elastic"]
   s.email           = 'info@elastic.co'
