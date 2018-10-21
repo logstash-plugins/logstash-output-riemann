@@ -134,6 +134,9 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
 
     r_event[:description] = event.get("message")
 
+    if @map_fields == true
+      r_event.merge! map_fields(nil, event.to_hash)
+    end
     if @riemann_event
       @riemann_event.each do |key, val|
         if ["ttl","metric"].include?(key)
@@ -142,9 +145,6 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
           r_event[key.to_sym] = event.sprintf(val)
         end
       end
-    end
-    if @map_fields == true
-      r_event.merge! map_fields(nil, event.to_hash)
     end
     r_event[:tags] = event.get("tags") if event.get("tags").is_a?(Array)
     r_event[:host] = event.sprintf(@sender)

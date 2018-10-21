@@ -4,7 +4,7 @@ require "logstash/json"
 
 describe "outputs/riemann" do
   let(:output) { LogStash::Plugin.lookup("output", "riemann").new }
-  
+
   context "registration" do
 
     it "should register" do
@@ -130,5 +130,20 @@ describe "outputs/riemann" do
         expect(output.build_riemann_formatted_event(event)).to eq expected_data
       end
     end
+
+
+    context "with riemann_event and map_fields" do
+
+      let(:output) { LogStash::Plugin.lookup("output", "riemann").new("map_fields" => "true") }
+
+      it "will give precendence to fields in riemann_event" do
+        data = {"field_a" => "a_val1", "field_b" => "b_val1", "message" => "hello", "@version"=>"1", "@timestamp"=>"2015-06-03T23:34:54.076Z", "host"=>"vagrant-ubuntu-trusty-64"}
+        expected_data = {:time=>1433374494, :description =>"hello", :host =>"vagrant-ubuntu-trusty-64", :field_a => "a_val2", :field_b => "b_val1", :field_c => "c_val1", :message => "hello"}
+        event = LogStash::Event.new data
+        output.riemann_event = {"field_a" => "a_val2", "field_c" => "c_val1"}
+        expect(output.build_riemann_formatted_event(event)).to eq expected_data
+      end
+    end
+
   end
 end
