@@ -1,3 +1,6 @@
+## 3.0.5
+  - Fix formatting in doc for conversion to --asciidoctor [#tbd](https://github.com/logstash-plugins/logstash-output-riemann/pull/tbd)
+
 ## 3.0.4
   - Docs: Set the default_codec doc attribute.
 
