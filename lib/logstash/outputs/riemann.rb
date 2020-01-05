@@ -132,24 +132,37 @@ class LogStash::Outputs::Riemann < LogStash::Outputs::Base
     # Let's build us an event, shall we?
     r_event = Hash.new
 
+    # Always copy "message" to Riemann's "description" field.
     r_event[:description] = event.get("message")
 
-    if @riemann_event
-      @riemann_event.each do |key, val|
-        if ["ttl","metric"].include?(key)
-          r_event[key.to_sym] = event.sprintf(val).to_f
-        else
-          r_event[key.to_sym] = event.sprintf(val)
-        end
-      end
-    end
+    # Directly map all other fields, if requested. Note that the "message" field
+    # will also be mapped this way, so if it's present, it will become a
+    # redundant copy of "description".
     if @map_fields == true
       r_event.merge! map_fields(nil, event.to_hash)
     end
+
+    # Fields specified in the "riemann_event" configuration option take
+    # precedence over mapped fields.
+    if @riemann_event
+      @riemann_event.each do |key, val|
+        r_event[key.to_sym] = event.sprintf(val)
+      end
+    end
+
+    # Riemann event attributes are always strings, with a few critical
+    # exceptions. "ttl" and "metric" should be sent as float values.
+    r_event[:ttl] = r_event[:ttl].to_f if r_event[:ttl]
+    r_event[:metric] = r_event[:metric].to_f if r_event[:metric]
+
+    # Similarly, event _time_ in Riemann was historically an integer value.
+    # While current Riemann versions support sub-second time resolution in the
+    # form of a float, we currently ensure that we send an integer value, as
+    # expected by Riemann versions earlier than 0.2.13.
+    r_event[:time] = event.timestamp.to_i
+
     r_event[:tags] = event.get("tags") if event.get("tags").is_a?(Array)
     r_event[:host] = event.sprintf(@sender)
-    # riemann doesn't handle floats so we reduce the precision here
-    r_event[:time] = event.timestamp.to_i
 
     return r_event
   end
