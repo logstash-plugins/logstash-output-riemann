@@ -90,6 +90,49 @@ describe "outputs/riemann" do
         output.sender = "%{test_hostname}"
         expect(output.build_riemann_formatted_event(event)).to eq expected_data
       end
+
+      it "will overwrite mapped fields with their equivalent configuration options" do
+        mapped_fields = {
+          "description" => "old description",
+          "metric" => 1.0,
+          "service" => "old service",
+          "state" => "old state",
+          "ttl" => 1,
+        }
+
+        configuration_options = {
+          "description" => "new description",
+          "metric" => 2.0,
+          "service" => "new service",
+          "state" => "new state",
+          "ttl" => 2,
+        }
+
+        incoming_event = LogStash::Event.new(mapped_fields)
+        output.riemann_event = configuration_options
+        outgoing_event = output.build_riemann_formatted_event(incoming_event)
+
+        expect(outgoing_event[:description]).to eq("new description")
+        expect(outgoing_event[:metric]).to eq(2.0)
+        expect(outgoing_event[:service]).to eq("new service")
+        expect(outgoing_event[:state]).to eq("new state")
+        expect(outgoing_event[:ttl]).to eq(2)
+      end
+
+      it "will set float values for ttl and metric from string values in fields" do
+        mapped_fields = {
+          "ttl" => "300",
+          "metric" => "423.5"
+        }
+
+        incoming_event = LogStash::Event.new(mapped_fields)
+        outgoing_event = output.build_riemann_formatted_event(incoming_event)
+
+        expect(outgoing_event[:ttl]).to be_a(Float)
+        expect(outgoing_event[:ttl]).to eq(300)
+        expect(outgoing_event[:metric]).to be_a(Float)
+        expect(outgoing_event[:metric]).to eq(423.5)
+      end
     end
 
     context "without map_fields" do
