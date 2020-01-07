@@ -1,3 +1,9 @@
+## 3.0.6
+  - Fix values from "riemann_event" not overwriting those from "map_fields".
+    [#22](https://github.com/logstash-plugins/logstash-output-riemann/issues/22)
+  - Fix ttl, metric sometimes being sent as string, not float.
+    [#23](https://github.com/logstash-plugins/logstash-output-riemann/issues/23)
+
 ## 3.0.5
   - Fix formatting in doc for conversion to --asciidoctor [#21](https://github.com/logstash-plugins/logstash-output-riemann/pull/21)
 
