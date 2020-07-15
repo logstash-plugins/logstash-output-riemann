@@ -16,7 +16,7 @@ describe "outputs/riemann" do
         expect {
           output = LogStash::Plugin.lookup("output", "riemann").new("protocol" => "fake")
           output.register
-          }.to raise_error
+          }.to raise_error(LogStash::ConfigurationError)
       end
 
       it "should not error out if set to [tcp]" do

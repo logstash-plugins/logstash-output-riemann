@@ -1,3 +1,6 @@
+## 3.0.7
+  - Updated riemann-client gem to 0.2.6 to benefit timeout support
+
 ## 3.0.6
   - Fix values from "riemann_event" not overwriting those from "map_fields".
     [#22](https://github.com/logstash-plugins/logstash-output-riemann/issues/22)
